@@ -1,46 +1,68 @@
-# QueueCraft - YouTube & YouTube Kids Playlist & Autoplay
+# QueueCraft
 
-QueueCraft is a lightweight, distraction-free Chrome extension for **YouTube** and **YouTube Kids**. It allows users to quickly queue up videos from any browse or search page by clicking a `(+)` button on video thumbnails, then autoplays them sequentially.
+<p align="center">
+  <img src="docs/assets/preview.png" alt="QueueCraft Banner & UI Preview" width="100%" />
+</p>
+
+<p align="center">
+  <strong>🍿 Lightweight, distraction-free video queue & autoplay extension for YouTube & YouTube Kids.</strong>
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#how-it-works">How It Works</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#chrome-web-store-deployment">Deploy to Marketplace</a>
+</p>
+
+---
 
 ## Features
 
-- **One-Click Queuing**: Click `(+)` on thumbnails on YouTube or YouTube Kids. Queued videos show dynamic order badges (`1`, `2`, `3`...).
-- **Drag-to-Reorder**: Reorder the playlist on the fly inside the popup.
-- **Accurate Total Duration**: Calculates and displays the exact summed runtime across all queued videos.
-- **Minimal Floating Dock**: A pill-shaped floating dock (`[ ▶ Play | 3 ] 18m [ ✕ ]`) that stays unobtrusive and auto-hides while watching videos.
-- **Session Auto-Reset**: Resets the queue when closing the browser or putting the system to sleep.
-- **Multi-language Support (i18n)**: English (`en`) and Vietnamese (`vi`).
-- **Seamless Kids & Main Platform Switching**: Works transparently whether you are on `youtube.com` or `youtubekids.com`.
+QueueCraft streamlines video queuing on both **regular YouTube** and **YouTube Kids** without altering the native watching experience or cluttering your screen:
 
-## Installation (Local Development)
+- ➕ **One-Click Thumbnail Queuing**: Hover and click the clean `(+)` overlay on any video thumbnail.
+- 🔢 **Dynamic Order Badges**: Selected videos highlight with sequential numbered badges (`1`, `2`, `3`...).
+- ↕️ **Native Drag-and-Drop Reordering**: Drag video rows in the popup to reorder your playlist effortlessly.
+- ⏱️ **Accurate Duration Summing**: Extracts precise durations directly from each video badge and displays the exact total playlist runtime (`~24m`, `~1h 15m`).
+- 🎬 **Minimal Floating Dock**: A discreet pill dock (`[ ▶ Play | 3 ] 18m [ ✕ ]`) anchored in the bottom corner that automatically hides during full video playback.
+- 🌙 **Session Reset**: The playlist automatically clears when closing your browser or when the machine goes to sleep or locks.
+- 🌐 **Full Internationalization (i18n)**: Out-of-the-box support for both **English** (`en`) and **Vietnamese** (`vi`).
+- 🧸 **Universal Platform Compatibility**: Smoothly transitions between `youtube.com` and `youtubekids.com`.
 
-1. Clone or download this repository.
-2. Open Google Chrome and navigate to `chrome://extensions`.
-3. Enable **Developer mode** (toggle in top right).
-4. Click **Load unpacked** and select this directory.
+---
 
-## Project Structure
+## How It Works
 
 ```
-├── manifest.json        # Extension Manifest V3
-├── background.js        # Service worker for startup & sleep/idle reset
-├── content.js           # Injected DOM script for buttons & video detection
-├── content.css          # Minimal styles for badges & dock
-├── popup.html           # Queue manager popup UI
-├── popup.js             # Drag-and-drop & playback controller
-├── _locales/            # Internationalization (en, vi)
-└── icons/               # Extension icons (16px, 48px, 128px)
+Browse YouTube / Kids ──> Click (+) on Thumbnails ──> [ ▶ Play ] on Dock or Popup ──> Autoplays in sequence
 ```
 
-## Packaging for Chrome Web Store
+1. **Add Videos**: While browsing YouTube or YouTube Kids, click the `(+)` icon on any thumbnail to add it to your queue.
+2. **Review & Reorder**: Open the QueueCraft extension popup by clicking its toolbar icon to drag and reorder or remove videos.
+3. **Play Sequentially**: Click **Play**, and QueueCraft will progress from one video to the next automatically once each finishes.
 
-Run:
+---
+
+## Installation (Local Developer Mode)
+
+1. Clone or download this repository:
+   ```bash
+   git clone https://github.com/pnqphong95/queuecraft.git
+   ```
+2. Open Google Chrome and go to `chrome://extensions`.
+3. Enable **Developer mode** via the switch in the top-right corner.
+4. Click **Load unpacked** and select the `queuecraft` folder.
+5. Visit [youtube.com](https://www.youtube.com) or [youtubekids.com](https://www.youtubekids.com) and start queuing!
+
+---
+
+## Chrome Web Store Deployment
+
+To package QueueCraft for the Chrome Web Store or Microsoft Edge Add-ons:
+
 ```bash
-zip -r queuecraft.zip manifest.json background.js content.js content.css popup.html popup.js _locales/ icons/ -x "*.DS_Store*"
+zip -r queuecraft.zip manifest.json background.js content.js content.css popup.html popup.js _locales/ icons/ README.md -x "*.DS_Store*"
 ```
 
 Upload `queuecraft.zip` to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole).
-
-## License
-
-MIT
