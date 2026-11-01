@@ -1,0 +1,95 @@
+{
+  "extName": {
+    "message": "QueueCraft - Video Queue & Autoplay",
+    "description": "Extension title"
+  },
+  "extDesc": {
+    "message": "Select videos on YouTube and YouTube Kids to build instant custom queues that autoplay sequentially.",
+    "description": "Extension description"
+  },
+  "actionTitle": {
+    "message": "QueueCraft",
+    "description": "Toolbar button tooltip"
+  },
+  "play": {
+    "message": "Play",
+    "description": "Play label"
+  },
+  "playQueue": {
+    "message": "Play Queue",
+    "description": "Play queue button"
+  },
+  "playingStatus": {
+    "message": "Playing ($INDEX$/$TOTAL$)",
+    "description": "Status when playing",
+    "placeholders": {
+      "index": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "clear": {
+    "message": "Clear",
+    "description": "Clear queue button"
+  },
+  "clearQueue": {
+    "message": "Clear Queue",
+    "description": "Clear queue tooltip"
+  },
+  "queueCleared": {
+    "message": "Queue cleared",
+    "description": "Toast when queue is cleared"
+  },
+  "queueFinished": {
+    "message": "Queue finished",
+    "description": "Toast when queue finishes playback"
+  },
+  "addToQueue": {
+    "message": "Add to Queue",
+    "description": "Button tooltip to add item"
+  },
+  "removeFromQueue": {
+    "message": "Click to remove",
+    "description": "Button tooltip to remove item"
+  },
+  "queueItem": {
+    "message": "Queue #$INDEX$",
+    "description": "Item order badge",
+    "placeholders": {
+      "index": { "content": "$1" }
+    }
+  },
+  "addedToast": {
+    "message": "Added #$INDEX$",
+    "description": "Toast when video added",
+    "placeholders": {
+      "index": { "content": "$1" }
+    }
+  },
+  "removedToast": {
+    "message": "Removed from queue",
+    "description": "Toast when video removed"
+  },
+  "emptyTitle": {
+    "message": "Queue is empty",
+    "description": "Empty state title"
+  },
+  "emptyHint": {
+    "message": "Click (+) on any video to add",
+    "description": "Empty state hint"
+  },
+  "vidsCount": {
+    "message": "$COUNT$ vids",
+    "description": "Count of videos",
+    "placeholders": {
+      "count": { "content": "$1" }
+    }
+  },
+  "dragReorder": {
+    "message": "Drag to reorder",
+    "description": "Drag handle tooltip"
+  },
+  "remove": {
+    "message": "Remove",
+    "description": "Remove button tooltip"
+  }
+}

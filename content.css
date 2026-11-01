@@ -1,0 +1,223 @@
+/* Video Queue & Autoplay - Content Styles */
+
+/* (+) Add / Order Button on Video Thumbnails */
+.kp-add-btn {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 10 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  border-radius: 50% !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+  cursor: pointer !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 19px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease !important;
+  user-select: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.kp-add-btn:hover {
+  background: #2563eb !important;
+  border-color: #93c5fd !important;
+  transform: scale(1.12) !important;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.55) !important;
+}
+
+/* Added state: Green badge with order number */
+.kp-add-btn.kp-added {
+  background: #10b981 !important;
+  border-color: #a7f3d0 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.6) !important;
+}
+
+.kp-add-btn.kp-added:hover {
+  background: #ef4444 !important;
+  border-color: #fecaca !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.6) !important;
+}
+
+.kp-add-btn.kp-added:hover::after {
+  content: "✕";
+  font-size: 15px;
+}
+
+.kp-add-btn.kp-added:hover .kp-order-text {
+  display: none !important;
+}
+
+/* Translucent overlay on selected thumbnails */
+.kp-thumbnail-selected {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+}
+
+.kp-selected-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.58) !important;
+  border-radius: inherit !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.kp-thumbnail-selected img {
+  filter: brightness(0.72) !important;
+  transition: filter 0.2s ease !important;
+}
+
+/* Hide in Fullscreen Mode */
+:fullscreen .kp-add-btn,
+:-webkit-full-screen .kp-add-btn,
+:-moz-full-screen .kp-add-btn,
+:-ms-fullscreen .kp-add-btn,
+body.kp-is-fullscreen .kp-add-btn,
+body.kp-is-fullscreen #kp-floating-bar,
+body.kp-is-fullscreen .kp-selected-overlay {
+  display: none !important;
+}
+
+/* Minimal Floating Dock */
+#kp-floating-bar {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 2147483640 !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  padding: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s ease !important;
+  pointer-events: auto !important;
+  opacity: 0.92 !important;
+}
+
+#kp-floating-bar:hover {
+  opacity: 1 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+#kp-floating-bar.kp-collapsed {
+  transform: translateY(120%) scale(0.9) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Play button pill with embedded count badge */
+.kp-dock-play-btn {
+  background: #2563eb !important;
+  color: white !important;
+  border: none !important;
+  padding: 7px 12px 7px 12px !important;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  line-height: 1 !important;
+  transition: background 0.15s ease !important;
+}
+
+.kp-dock-play-btn:hover {
+  background: #1d4ed8 !important;
+}
+
+.kp-dock-count {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  padding: 2px 7px !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* Estimated duration badge in dock */
+.kp-dock-time {
+  color: #94a3b8 !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  padding: 0 6px 0 2px !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+}
+
+/* Clear icon button */
+.kp-dock-clear-btn {
+  background: transparent !important;
+  color: #94a3b8 !important;
+  border: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.kp-dock-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+/* Toast Notifications */
+.kp-toast {
+  position: fixed !important;
+  top: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) translateY(-20px) !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid #10b981 !important;
+  color: #fff !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+  z-index: 2147483647 !important;
+  opacity: 0 !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  pointer-events: none !important;
+}
+
+.kp-toast.kp-show {
+  transform: translateX(-50%) translateY(0) !important;
+  opacity: 1 !important;
+}

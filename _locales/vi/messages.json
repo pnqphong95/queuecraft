@@ -1,0 +1,95 @@
+{
+  "extName": {
+    "message": "QueueCraft - Danh sách phát & Tự động phát",
+    "description": "Extension title"
+  },
+  "extDesc": {
+    "message": "Chọn video trên YouTube và YouTube Kids để tạo danh sách phát tức thì và tự động phát liên tục.",
+    "description": "Extension description"
+  },
+  "actionTitle": {
+    "message": "QueueCraft",
+    "description": "Toolbar button tooltip"
+  },
+  "play": {
+    "message": "Phát",
+    "description": "Play label"
+  },
+  "playQueue": {
+    "message": "Phát danh sách",
+    "description": "Play queue button"
+  },
+  "playingStatus": {
+    "message": "Đang phát ($INDEX$/$TOTAL$)",
+    "description": "Status when playing",
+    "placeholders": {
+      "index": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "clear": {
+    "message": "Xoá",
+    "description": "Clear queue button"
+  },
+  "clearQueue": {
+    "message": "Xoá danh sách",
+    "description": "Clear queue tooltip"
+  },
+  "queueCleared": {
+    "message": "Đã xoá danh sách phát",
+    "description": "Toast when queue is cleared"
+  },
+  "queueFinished": {
+    "message": "Đã phát xong danh sách",
+    "description": "Toast when queue finishes playback"
+  },
+  "addToQueue": {
+    "message": "Thêm vào danh sách",
+    "description": "Button tooltip to add item"
+  },
+  "removeFromQueue": {
+    "message": "Nhấp để xoá",
+    "description": "Button tooltip to remove item"
+  },
+  "queueItem": {
+    "message": "Video số $INDEX$",
+    "description": "Item order badge",
+    "placeholders": {
+      "index": { "content": "$1" }
+    }
+  },
+  "addedToast": {
+    "message": "Đã thêm #$INDEX$",
+    "description": "Toast when video added",
+    "placeholders": {
+      "index": { "content": "$1" }
+    }
+  },
+  "removedToast": {
+    "message": "Đã xoá khỏi danh sách",
+    "description": "Toast when video removed"
+  },
+  "emptyTitle": {
+    "message": "Danh sách đang trống",
+    "description": "Empty state title"
+  },
+  "emptyHint": {
+    "message": "Nhấp dấu (+) trên bất kỳ video nào để thêm",
+    "description": "Empty state hint"
+  },
+  "vidsCount": {
+    "message": "$COUNT$ video",
+    "description": "Count of videos",
+    "placeholders": {
+      "count": { "content": "$1" }
+    }
+  },
+  "dragReorder": {
+    "message": "Kéo để đổi thứ tự",
+    "description": "Drag handle tooltip"
+  },
+  "remove": {
+    "message": "Xoá",
+    "description": "Remove button tooltip"
+  }
+}
