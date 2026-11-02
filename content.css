@@ -94,9 +94,17 @@
 :-webkit-full-screen .kp-add-btn,
 :-moz-full-screen .kp-add-btn,
 :-ms-fullscreen .kp-add-btn,
+:fullscreen #kp-floating-bar,
+:-webkit-full-screen #kp-floating-bar,
+:-moz-full-screen #kp-floating-bar,
+:-ms-fullscreen #kp-floating-bar,
 body.kp-is-fullscreen .kp-add-btn,
 body.kp-is-fullscreen #kp-floating-bar,
-body.kp-is-fullscreen .kp-selected-overlay {
+body.kp-is-fullscreen .kp-selected-overlay,
+html.kp-is-fullscreen .kp-add-btn,
+html.kp-is-fullscreen #kp-floating-bar,
+html.kp-is-fullscreen .kp-selected-overlay,
+.ytp-fullscreen ~ #kp-floating-bar {
   display: none !important;
 }
 

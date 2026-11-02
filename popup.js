@@ -27,22 +27,41 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClear.textContent = t('clear', null, 'Clear');
   }
 
+  let activeTabId = null;
+  const storageArea = chrome.storage.local;
+
+  function getStorageKeys() {
+    const suffix = activeTabId !== null ? `_${activeTabId}` : '';
+    return {
+      queueKey: `kp_queue${suffix}`,
+      indexKey: `kp_current_index${suffix}`,
+      autoplayKey: `kp_autoplay${suffix}`
+    };
+  }
+
   function loadState() {
-    if (!chrome.storage || !chrome.storage.local) return;
-    chrome.storage.local.get(['kp_queue', 'kp_current_index', 'kp_autoplay'], (res) => {
-      queue = res.kp_queue || [];
-      currentIndex = res.kp_current_index || 0;
-      isAutoPlayActive = res.kp_autoplay || false;
-      render();
+    if (!storageArea) return;
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        activeTabId = tabs[0].id;
+      }
+      const { queueKey, indexKey, autoplayKey } = getStorageKeys();
+      storageArea.get([queueKey, indexKey, autoplayKey], (res) => {
+        queue = res[queueKey] || [];
+        currentIndex = res[indexKey] || 0;
+        isAutoPlayActive = res[autoplayKey] || false;
+        render();
+      });
     });
   }
 
   function saveState() {
-    if (!chrome.storage || !chrome.storage.local) return;
-    chrome.storage.local.set({
-      kp_queue: queue,
-      kp_current_index: currentIndex,
-      kp_autoplay: isAutoPlayActive
+    if (!storageArea) return;
+    const { queueKey, indexKey, autoplayKey } = getStorageKeys();
+    storageArea.set({
+      [queueKey]: queue,
+      [indexKey]: currentIndex,
+      [autoplayKey]: isAutoPlayActive
     }, () => {
       render();
     });
@@ -122,10 +141,16 @@ document.addEventListener('DOMContentLoaded', () => {
           ${durBadge}
         </div>
         <div class="video-info">
-          <span class="video-title" title="${item.title}">${item.title}</span>
+          <span class="video-title"></span>
         </div>
         <button class="btn-remove-item" title="${removeTooltip}">✕</button>
       `;
+
+      const titleEl = li.querySelector('.video-title');
+      if (titleEl) {
+        titleEl.textContent = item.title || 'YouTube Video';
+        titleEl.title = item.title || '';
+      }
 
       // Drag and Drop Event Listeners
       li.addEventListener('dragstart', (e) => {
@@ -227,13 +252,29 @@ document.addEventListener('DOMContentLoaded', () => {
     saveState();
   });
 
-  // Storage listener
+  // Storage listener (scoped to current tab)
   if (chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local') {
-        if (changes.kp_queue) queue = changes.kp_queue.newValue || [];
-        if (changes.kp_current_index) currentIndex = changes.kp_current_index.newValue || 0;
-        if (changes.kp_autoplay) isAutoPlayActive = changes.kp_autoplay.newValue || false;
+      const isTargetArea = area === 'session' || area === 'local';
+      if (!isTargetArea) return;
+
+      const { queueKey, indexKey, autoplayKey } = getStorageKeys();
+      let changed = false;
+
+      if (changes[queueKey]) {
+        queue = changes[queueKey].newValue || [];
+        changed = true;
+      }
+      if (changes[indexKey]) {
+        currentIndex = changes[indexKey].newValue || 0;
+        changed = true;
+      }
+      if (changes[autoplayKey]) {
+        isAutoPlayActive = changes[autoplayKey].newValue || false;
+        changed = true;
+      }
+
+      if (changed) {
         render();
       }
     });

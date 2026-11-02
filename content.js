@@ -14,28 +14,66 @@
     return fallback || key;
   }
 
+  let currentTabId = null;
+  let tabIdPromise = null;
+  const storageArea = chrome.storage.local;
+
+  function ensureTabId() {
+    if (currentTabId !== null) return Promise.resolve(currentTabId);
+    if (!tabIdPromise) {
+      tabIdPromise = new Promise((resolve) => {
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+          chrome.runtime.sendMessage({ action: 'getTabId' }, (res) => {
+            if (res && res.tabId) {
+              currentTabId = res.tabId;
+            }
+            resolve(currentTabId);
+          });
+        } else {
+          resolve(null);
+        }
+      });
+    }
+    return tabIdPromise;
+  }
+
+  function getStorageKeys() {
+    const suffix = currentTabId !== null ? `_${currentTabId}` : '';
+    return {
+      queueKey: `kp_queue${suffix}`,
+      indexKey: `kp_current_index${suffix}`,
+      autoplayKey: `kp_autoplay${suffix}`
+    };
+  }
+
   // Sync state from storage
   function loadQueue(callback) {
-    if (!chrome.storage || !chrome.storage.local) return;
-    chrome.storage.local.get(['kp_queue', 'kp_current_index', 'kp_autoplay'], (res) => {
-      queue = res.kp_queue || [];
-      currentIndex = res.kp_current_index || 0;
-      isAutoPlayActive = res.kp_autoplay || false;
-      updateFloatingBar();
-      updateAllButtonStates();
-      if (callback) callback();
+    if (!storageArea) return;
+    ensureTabId().then(() => {
+      const { queueKey, indexKey, autoplayKey } = getStorageKeys();
+      storageArea.get([queueKey, indexKey, autoplayKey], (res) => {
+        queue = res[queueKey] || [];
+        currentIndex = res[indexKey] || 0;
+        isAutoPlayActive = res[autoplayKey] || false;
+        updateFloatingBar();
+        updateAllButtonStates();
+        if (callback) callback();
+      });
     });
   }
 
   function saveQueue() {
-    if (!chrome.storage || !chrome.storage.local) return;
-    chrome.storage.local.set({
-      kp_queue: queue,
-      kp_current_index: currentIndex,
-      kp_autoplay: isAutoPlayActive
-    }, () => {
-      updateFloatingBar();
-      updateAllButtonStates();
+    if (!storageArea) return;
+    ensureTabId().then(() => {
+      const { queueKey, indexKey, autoplayKey } = getStorageKeys();
+      storageArea.set({
+        [queueKey]: queue,
+        [indexKey]: currentIndex,
+        [autoplayKey]: isAutoPlayActive
+      }, () => {
+        updateFloatingBar();
+        updateAllButtonStates();
+      });
     });
   }
 
@@ -171,23 +209,113 @@
     return { sec: 0, text: '' };
   }
 
-  // Fullscreen detection to guarantee hiding in full screen
+  // Deep scraper to extract exact video title directly from YouTube & YouTube Kids DOM
+  function extractTitle(card) {
+    if (!card) return '';
+
+    // Helper to sanitize title strings (removing leading/trailing "Video " or metadata)
+    function sanitizeTitle(raw) {
+      if (!raw) return '';
+      let cleaned = raw.trim();
+      // If title begins with "Video " (common in YouTube Kids aria-labels), strip it
+      cleaned = cleaned.replace(/^Video\s+/i, '');
+      return cleaned.trim();
+    }
+
+    // 1. YouTube Kids direct element selectors
+    // Structure: .details .primary-text span[dir="auto"], .primary-text, .details
+    const ytkSpecific = card.querySelector(
+      '.primary-text span[dir="auto"], .primary-text span, .primary-text, .details span, .ytk-compact-video-renderer__title'
+    );
+    if (ytkSpecific) {
+      const text = (ytkSpecific.textContent || '').trim();
+      if (text && text !== 'YouTube Video' && text.length > 1) {
+        return sanitizeTitle(text);
+      }
+    }
+
+    // 2. Standard YouTube video-title & heading elements
+    const standardTitle = card.querySelector(
+      '#video-title, .title, [id="title"], h3, h4, yt-formatted-string#video-title'
+    );
+    if (standardTitle) {
+      const text = (standardTitle.getAttribute('title') || standardTitle.textContent || '').trim();
+      if (text && text !== 'YouTube Video' && text.length > 1) {
+        return sanitizeTitle(text);
+      }
+    }
+
+    // 3. Main link aria-label / title (e.g. <a aria-label="Video 🐱🐱🐱 ... 2 phút, 29 giây">)
+    const mainLink = card.querySelector('a.yt-simple-endpoint[aria-label], a[href*="/watch"][aria-label]');
+    if (mainLink) {
+      let aria = (mainLink.getAttribute('aria-label') || '').trim();
+      if (aria) {
+        // Remove trailing duration text like "2 phút, 29 giây" or "2 minutes, 29 seconds" or "2:29"
+        aria = aria.replace(/\s+\d{1,2}:\d{2}(?::\d{2})?\s*$/i, '');
+        aria = aria.replace(/\s+\d+\s*(?:minutes?|mins?|phút)?(?:,\s*\d+\s*(?:seconds?|secs?|giây)?)?\s*$/i, '');
+        const clean = sanitizeTitle(aria);
+        if (clean && clean.length > 1) {
+          return clean;
+        }
+      }
+    }
+
+    // 4. Any thumbnail or card level title
+    const otherTitle = card.getAttribute('title') || (card.querySelector('[title]') && card.querySelector('[title]').getAttribute('title'));
+    if (otherTitle && otherTitle.trim().length > 1) {
+      return sanitizeTitle(otherTitle);
+    }
+
+    return '';
+  }
+
+  // Fullscreen detection to guarantee hiding in full screen (YouTube player & native browser fullscreen)
   function setupFullscreenDetection() {
     function checkFullscreen() {
-      const isFull = !!(
+      const isNativeFull = !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.mozFullScreenElement ||
         document.msFullscreenElement
       );
+
+      // YouTube & YouTube Kids player fullscreen detection via DOM classes / attributes
+      const player = document.querySelector('#movie_player, .html5-video-player, ytd-player, ytk-player');
+      const isPlayerFull = player ? (
+        player.classList.contains('ytp-fullscreen') ||
+        player.classList.contains('fullscreen') ||
+        player.getAttribute('fullscreen') !== null
+      ) : false;
+
+      const isFull = isNativeFull || isPlayerFull;
       if (document.body) {
         document.body.classList.toggle('kp-is-fullscreen', isFull);
+      }
+      if (document.documentElement) {
+        document.documentElement.classList.toggle('kp-is-fullscreen', isFull);
       }
     }
 
     document.addEventListener('fullscreenchange', checkFullscreen);
     document.addEventListener('webkitfullscreenchange', checkFullscreen);
     document.addEventListener('mozfullscreenchange', checkFullscreen);
+    window.addEventListener('resize', checkFullscreen);
+
+    // Watch for class changes on YouTube player (e.g. ytp-fullscreen toggle)
+    const playerObserver = new MutationObserver(() => {
+      checkFullscreen();
+    });
+
+    function attachPlayerObserver() {
+      const player = document.querySelector('#movie_player, .html5-video-player, ytd-player, ytk-player');
+      if (player && !player._kpObserved) {
+        player._kpObserved = true;
+        playerObserver.observe(player, { attributes: true, attributeFilter: ['class', 'fullscreen'] });
+      }
+    }
+
+    setInterval(attachPlayerObserver, 1500);
+    setInterval(checkFullscreen, 500);
   }
 
   // Minimal Floating Dock (Play with count + Exact total time + Clear button)
@@ -258,8 +386,16 @@
       }
     }
 
-    const isWatchingVideo = window.location.pathname.includes('/watch') || window.location.pathname.includes('/shorts');
-    if (queue.length === 0 || isWatchingVideo) {
+    const playBtnText = document.querySelector('#kp-btn-start span:first-child');
+    if (playBtnText) {
+      const playLabel = t('play', null, 'Play');
+      playBtnText.textContent = isAutoPlayActive
+        ? `▶ ${t('playingStatus', [String(currentIndex + 1), String(queue.length)], `Playing (${currentIndex + 1}/${queue.length})`)}`
+        : `▶ ${playLabel}`;
+    }
+
+    // Display whenever there is at least one video in the queue, regardless of page or play mode
+    if (queue.length === 0) {
       bar.classList.add('kp-collapsed');
     } else {
       bar.classList.remove('kp-collapsed');
@@ -438,15 +574,17 @@
           showToast(t('removedToast', null, 'Removed from queue'));
         } else {
           const durationData = extractDuration(card);
-          queue.push({
+          const dynamicTitle = extractTitle(card);
+          const newItem = {
             id: videoId,
-            title: title || 'YouTube Video',
+            title: dynamicTitle || 'YouTube Video',
             url: fullUrl,
             thumb: thumbUrl,
             durationSec: durationData.sec,
             durationText: durationData.text,
             addedAt: Date.now()
-          });
+          };
+          queue.push(newItem);
           saveQueue();
           showToast(t('addedToast', [String(queue.length)], `Added #${queue.length}`));
         }
@@ -509,16 +647,19 @@
           saveQueue();
           showToast(t('removedToast', null, 'Removed from queue'));
         } else {
-          const durationData = extractDuration(thumbLink.parentElement || thumbLink);
-          queue.push({
+          const parentContainer = thumbLink.parentElement || thumbLink;
+          const durationData = extractDuration(parentContainer);
+          const dynamicTitle = extractTitle(parentContainer) || thumbLink.getAttribute('title') || thumbLink.getAttribute('aria-label') || '';
+          const newItem = {
             id: videoId,
-            title: 'YouTube Video',
+            title: dynamicTitle || 'YouTube Video',
             url: fullUrl,
             thumb: thumbUrl,
             durationSec: durationData.sec,
             durationText: durationData.text,
             addedAt: Date.now()
-          });
+          };
+          queue.push(newItem);
           saveQueue();
           showToast(t('addedToast', [String(queue.length)], `Added #${queue.length}`));
         }
@@ -531,10 +672,14 @@
   // Initialize
   function init() {
     createFloatingBar();
-    loadQueue();
     setupVideoEndListener();
     setupFullscreenDetection();
     attachButtons();
+
+    // Query current tab ID from background service worker to isolate queue per tab
+    ensureTabId().then(() => {
+      loadQueue();
+    });
 
     let debounceTimer;
     const observer = new MutationObserver(() => {
@@ -564,13 +709,29 @@
     init();
   }
 
-  // Sync across tabs
+  // React to storage changes for this tab only (e.g. from popup targeting this tab)
   if (chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local') {
-        if (changes.kp_queue) queue = changes.kp_queue.newValue || [];
-        if (changes.kp_current_index) currentIndex = changes.kp_current_index.newValue || 0;
-        if (changes.kp_autoplay) isAutoPlayActive = changes.kp_autoplay.newValue || false;
+      const isTargetArea = area === 'session' || area === 'local';
+      if (!isTargetArea) return;
+
+      const { queueKey, indexKey, autoplayKey } = getStorageKeys();
+      let changed = false;
+
+      if (changes[queueKey]) {
+        queue = changes[queueKey].newValue || [];
+        changed = true;
+      }
+      if (changes[indexKey]) {
+        currentIndex = changes[indexKey].newValue || 0;
+        changed = true;
+      }
+      if (changes[autoplayKey]) {
+        isAutoPlayActive = changes[autoplayKey].newValue || false;
+        changed = true;
+      }
+
+      if (changed) {
         updateFloatingBar();
         updateAllButtonStates();
       }
